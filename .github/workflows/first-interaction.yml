@@ -29,23 +29,42 @@ jobs:
             const repo = `${context.repo.owner}/${context.repo.repo}`;
             const currentNumber = context.issue.number;
 
-            // Build correct query
             const query = isPR
               ? `repo:${repo} is:pr author:${author}`
               : `repo:${repo} is:issue author:${author}`;
 
             const { data } = await github.rest.search.issuesAndPullRequests({ q: query });
 
-            // Exclude the current PR / Issue
             const previousItems = data.items.filter(
               item => item.number !== currentNumber
             );
 
-            // If nothing existed before, this is the first one
             if (previousItems.length === 0) {
               const message = isPR
-                ? `🎉 Hi @${author}!\n\nThanks for your first Pull Request 🚀\nWe really appreciate your contribution!`
-                : `👋 Hi @${author}!\n\nThanks for opening your first issue 🎉\nA maintainer will look into it soon.`;
+                ? `🎉 **Welcome @${author}!**<br><br>
+                   Congratulations on submitting your very first Pull Request 🚀  
+                   We’re excited to have you contributing to this project.<br><br>
+
+                   Please feel free to respond to any review comments or ask questions — we’re happy to help!<br><br>
+
+                   <a href="https://github.com/${repo}" target="_blank">
+                     <picture>
+                       <img width="600"
+                         src="https://raw.githubusercontent.com/Vatsal-Verma/test/main/.github/images/welcome.svg"
+                         alt="Welcome banner">
+                     </picture>
+                   </a>`
+                : `👋 **Hi @${author}, welcome!**<br><br>
+                   Thanks for opening your very first issue 🎉  
+                   Your feedback helps make this project better for everyone.<br><br>
+
+                   A maintainer will review this shortly. Thanks for taking the time to contribute!<br><br>
+
+                   <picture>
+                     <img width="600"
+                       src="https://raw.githubusercontent.com/Vatsal-Verma/test/main/.github/images/welcome.svg"
+                       alt="Welcome banner">
+                   </picture>`;
 
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
