@@ -14,6 +14,7 @@ permissions:
 jobs:
   welcome:
     runs-on: ubuntu-latest
+
     steps:
       - name: Welcome first-time contributor
         uses: actions/github-script@v7
@@ -29,42 +30,42 @@ jobs:
             const repo = `${context.repo.owner}/${context.repo.repo}`;
             const currentNumber = context.issue.number;
 
-            const query = isPR
-              ? `repo:${repo} is:pr author:${author}`
-              : `repo:${repo} is:issue author:${author}`;
+            // Build search query for both issues and PRs
+            const query = `repo:${repo} author:${author}`;
 
-            const { data } = await github.rest.search.issuesAndPullRequests({ q: query });
+            const { data } = await github.rest.search.issuesAndPullRequests({
+              q: query
+            });
 
+            // Exclude the current issue/PR
             const previousItems = data.items.filter(
               item => item.number !== currentNumber
             );
 
+            // If this is the first interaction (issue or PR)
             if (previousItems.length === 0) {
+              const imageUrl =
+                "https://raw.githubusercontent.com/Vatsal-Verma/testing-/main/.github/images/welcome.svg";
+
               const message = isPR
-                ? `🎉 **Welcome @${author}!**<br><br>
-                   Congratulations on submitting your very first Pull Request 🚀  
-                   We’re excited to have you contributing to this project.<br><br>
+                ? `🎉 **Welcome @${author}!**
 
-                   Please feel free to respond to any review comments or ask questions — we’re happy to help!<br><br>
-
-                   <a href="https://github.com/${repo}" target="_blank">
-                     <picture>
-                       <img width="600"
-                         src="https://raw.githubusercontent.com/Vatsal-Verma/test/main/.github/images/welcome.svg"
-                         alt="Welcome banner">
-                     </picture>
-                   </a>`
-                : `👋 **Hi @${author}, welcome!**<br><br>
-                   Thanks for opening your very first issue 🎉  
-                   Your feedback helps make this project better for everyone.<br><br>
-
-                   A maintainer will review this shortly. Thanks for taking the time to contribute!<br><br>
-
-                   <picture>
-                     <img width="600"
-                       src="https://raw.githubusercontent.com/Vatsal-Verma/test/main/.github/images/welcome.svg"
-                       alt="Welcome banner">
-                   </picture>`;
+                Thanks for submitting your **first Pull Request** to this repository 🚀  
+                
+                We really appreciate you taking the time to contribute.  
+                A maintainer will review your PR soon.
+                
+                ![Welcome](${imageUrl})
+                `
+                                : `👋 **Hi @${author}, welcome!**
+                
+                Thanks for opening your **first issue** 🎉  
+                
+                Your feedback and ideas help make this project better.  
+                A maintainer will take a look shortly.
+                
+                ![Welcome](${imageUrl})
+                `;
 
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
